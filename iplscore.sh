@@ -2,8 +2,7 @@
 
 #Created By Basu Dev Adhikari
 #github https://github.com/basu-dev
-matchId=35622
-echo $2
+matchId=$1
 function fetch(){
 raw=$(curl -4 -s 'https://www.cricbuzz.com/api/cricket-match/commentary/'$matchId'' \
   --compressed | jq .miniscore)
