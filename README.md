@@ -18,14 +18,25 @@ And you can use it like
 "You need to inspect cricbuzz.com and get it for   right now"
 ```
 
-## Further Improvements
-I will try to add the latest ipl match id by itself without going to code and editing it . 
 ## Some Glances
-Sample 1
-<img src="./ipl1.png"><br>
+Get Id From Cricbuzz. Example
+<img src="./ipl5.png">
+For this match 35622 is the match id
+So do 
+```
+iplscore.sh 35622
+```
 Sample 2
-<img src="./ipl2.png">
+<img src="./ipl1.png"><br>
 Sample 3
-<img src="./ipl3.png">
+<img src="./ipl2.png">
 Sample 4
+<img src="./ipl3.png">
+Sample 1
 <img src="./ipl4.png">
+
+## Further Improvements
+I will try to add the latest ipl match id by itself without needing to get it from cricbuzz.com by yourself.
+
+## Your Suggestions
+You can give your suggestions and feedbacks from any social platforms. You can open issues if you use it and want any improvements.
