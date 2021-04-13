@@ -2,15 +2,11 @@
 
 #Created By Basu Dev Adhikari
 #github https://github.com/basu-dev
+
+
+echo #$
 matchId=$1
-function writeBlock(){
-	echo $1 > /tmp/display.txt
-	pkill -RTMIN+10 i3blocks
-}
-function clearBlock(){
-	echo "" > /tmp/display.txt
-	pkill -RTMIN+10 i3blocks
-}
+
 function validMatchId(){
 
 	status=$(curl -4 -I -s 'https://www.cricbuzz.com/api/cricket-match/commentary/'$matchId'' | awk '/HTTP/ {print $2}')
@@ -18,17 +14,12 @@ function validMatchId(){
 	if [ $status != 200 ]
 	then
 	echo "Invalid MatchId"
-	writeBlock "Invalid MatchId"
-	/bin/sleep 3
-        clearBlock	
 	exit 1
 	fi
 }
 validMatchId
-
-
 function fetch(){
-raw=$(curl -4 -s 'https://www.cricbuzz.com/api/cricket-match/commentary/'$matchId'' \
+raw=$(curl -4 -i -s 'https://www.cricbuzz.com/api/cricket-match/commentary/'$matchId'' \
   --compressed | jq .miniscore)
 # raw=`cat sample2.json | jq .miniscore`
 # echo $raw | jq 
@@ -71,10 +62,10 @@ batsManScores=$(echo $plrs | jq -r '"\(.[0].batName  ) \(.[0].batRuns)(\(.[0].ba
 #Bowling Stat of Strike Bowler aka current bowler
 bowlerScore=$(echo $plrs | jq -r '" \(.[2].bowlName) \(.[2].bowlWkts)/\(.[2].bowlRuns) (\(.[2].bowlOvs)) " ' | awk '{print $2,$3,$4}')
 #Show recent scores like ...1 3 4 W 1 ...W 
-recentScores=$(echo $raw | jq -r '" Recent \(.recentOvsStats) "')
+recentScores=$(echo $raw | jq -r '" Recent Scores \(.recentOvsStats) "')
 #Sate shows whether match is complete or ongoing
 state=$(echo $raw | jq -r .matchScoreDetails.state)
-crr=$(echo $raw | jq -r .currentRunRate)
+
 
 }
 displaytype=0
@@ -88,12 +79,14 @@ function display(){
 if [ $state == "Complete" ]
 then
 middleSection=$(echo $raw | jq -r .status)
+break
 elif [ $displaytype -eq 0 ]
 then
 middleSection=$(echo "$batsManScores .. $bowlerScore")
+break
 elif [ $displaytype -eq 1 ]
 then
-	middleSection=$(echo "$recentScores ... CRR $crr ")
+middleSection=$recentScores
 else 
 
 middleSection=$(echo $raw | jq -r .status)
@@ -103,29 +96,30 @@ scoreBoard=$(echo "$scoreCard .. $middleSection .. $target $bowlTeam")
 
 echo -e "\033[36m $scoreBoard \033[0m"
 echo -e "\033[0m "
-writeBlock "${scoreBoard}"
+echo $scoreBoard >> /tmp/display.txt
+pkill -RTMIN+10 i3blocks
 }
 
-while true
+continue=true
+while $continue
 do
 fetch
 construct
 display
-/bin/sleep 5
+/bin/sleep 3
 displaytype=1
 display
-/bin/sleep 5
+/bin/sleep 3
 displaytype=2
 display
 if [ $state == "Complete" ]
 then
-clearBlock
-exit 1
-
+continue=false
+break
 fi
 displaytype=0
 display
-/bin/sleep 6
+/bin/sleep 10
 done
 
 
