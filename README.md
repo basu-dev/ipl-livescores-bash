@@ -20,20 +20,20 @@ And you can use it like
 
 ## Some Glances
 Get Id From Cricbuzz. Example
-<img src="./ipl5.png">
+<img src="./images/ipl5.png">
 For this match 35622 is the match id
 So do 
 ```
 iplscore.sh 35622
 ```
-Sample 2
-<img src="./ipl1.png"><br>
-Sample 3
-<img src="./ipl2.png">
-Sample 4
-<img src="./ipl3.png">
 Sample 1
-<img src="./ipl4.png">
+<img src="./images/ipl1.png"><br>
+Sample 2
+<img src="./images/ipl2.png">
+Sample 3
+<img src="./images/ipl3.png">
+Sample 4
+<img src="./images/ipl4.png">
 
 ## Further Improvements
 I will try to add the latest ipl match id by itself without needing to get it from cricbuzz.com by yourself.
