@@ -36,15 +36,15 @@ ipl.sh
 
 ## Some Glances
 
-Sample 1
+Sample 1<br>
 <img src="./images/ipl1.png"><br>
-Sample 2
+Sample 2<br>
 <img src="./images/ipl6.png"><br>
-Sample 3
+Sample 3<br>
 <img src="./images/ipl3.png"><br>
-Sample 4
+Sample 4<br>
 <img src="./images/ipl4.png"><br>
-Sample 5
+Sample 5<br>
 <img src="./images/ipl2.png">
 
 

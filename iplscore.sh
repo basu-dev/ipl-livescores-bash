@@ -123,25 +123,25 @@ echo -e "\033[0m "
 writeBlock "${scoreBoard}"
 }
 
-# while true
-# do
+while true
+do
 fetch
 construct
 display
-#  /bin/sleep 5
-#  displaytype=1
-#  display
-#  /bin/sleep 5
-#  displaytype=2
-#  display
-#  if [[ $state == "Complete" ]]
-#  then
-#  clearBlock
-#  exit 1
-#  fi
-#  displaytype=0
-#  display
-#  /bin/sleep 6
-#  done
+ /bin/sleep 5
+ displaytype=1
+ display
+ /bin/sleep 5
+ displaytype=2
+ display
+ if [[ $state == "Complete" ]]
+ then
+ clearBlock
+ exit 1
+ fi
+ displaytype=0
+ display
+ /bin/sleep 6
+ done
 
 
