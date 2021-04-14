@@ -2,6 +2,7 @@
 
 #Created By Basu Dev Adhikari
 #github https://github.com/basu-dev
+
 matchId=$1
 function writeBlock(){
 	echo $1 > /tmp/display.txt
@@ -85,7 +86,7 @@ function display(){
 #Third With Bowling Team and Target
 #Middle with Some additional Info
 
-if [ $state == "Complete" ]
+if [[ $state == "Complete" ]]
 then
 middleSection=$(echo $raw | jq -r .status)
 elif [ $displaytype -eq 0 ]
@@ -117,7 +118,7 @@ display
 /bin/sleep 5
 displaytype=2
 display
-if [ $state == "Complete" ]
+if [[ $state == "Complete" ]]
 then
 clearBlock
 exit 1
