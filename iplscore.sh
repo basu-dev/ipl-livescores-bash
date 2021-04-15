@@ -40,7 +40,7 @@ raw=$(curl -4 -s 'https://www.cricbuzz.com/api/cricket-match/commentary/'$matchI
   --compressed | jq .miniscore)
 # raw=`cat sample2.json | jq .miniscore`
 # echo $raw | jq 
-if [ $raw == null ]
+if [ "$raw" == null ]
 then
 matchNotStarted
 fi
@@ -128,17 +128,19 @@ do
 fetch
 construct
 display
+if [[ $state == "Complete" ]]
+ then
+	 /bin/sleep 3
+ clearBlock
+ exit 1
+ fi
  /bin/sleep 5
  displaytype=1
  display
  /bin/sleep 5
  displaytype=2
  display
- if [[ $state == "Complete" ]]
- then
- clearBlock
- exit 1
- fi
+
  displaytype=0
  display
  /bin/sleep 6
