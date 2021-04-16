@@ -4,7 +4,6 @@
 #github https://github.com/basu-dev
 
 matchId=$1
-echo $matchId
 function writeBlock(){
 	echo $1 > /tmp/display.txt
 	pkill -RTMIN+10 i3blocks
@@ -38,24 +37,21 @@ validMatchId
 function fetch(){
 raw=$(curl -4 -s 'https://www.cricbuzz.com/api/cricket-match/commentary/'$matchId'' \
   --compressed | jq .miniscore)
-# raw=`cat sample2.json | jq .miniscore`
-# echo $raw | jq 
+
 if [ "$raw" == null ]
 then
 matchNotStarted
 fi
 }
 
-# echo $raw 
 function construct(){
 #rawScore for showing Score Wickets and Overs only
 rawScore=$(echo $raw | jq .matchScoreDetails)
-echo $raw
 inning=$(echo $raw | jq .inningsId)
 #Summery was always on the first element of inningScoreList array
 summery=$(echo $rawScore | jq .inningsScoreList[0])
 #if/else for showing Target and Current Batting Team
-echo $inning
+
 if [ $inning == 0 ]
 then
 matchNotStarted

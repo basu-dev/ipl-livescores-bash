@@ -4,40 +4,27 @@
 function clear(){
     pkill -f 'iplscore.sh'
     echo "" > /tmp/display.txt
+    #this command just signals my i3block display section to rerender
     pkill -RTMIN+10 i3blocks
 }
-
 raw=$(curl -s -4 "https://www.cricbuzz.com/" | pup "li.videos-carousal-item")
-matchIds=()
-#echo $raw | pup "li.videos-carousal-item" > ~/scripts/iplscore/test.html
-
+#scraping all match ids from "a" tag
 matchIds+=($(echo $raw | pup "a attr{href} "  | awk -F "/" '{print $3}'))
+#scraping match title from "a" tag title
+matchTitles+=$(echo "$raw" | pup "a attr{title}")
+#writin the titles along with STOP WATCHING to tmp file
+echo "$matchTitles" > /tmp/matches.txt
+echo "STOP WATCHING" >> /tmp/matches.txt
+#Catching Selected Title From Rofi
+title=$(cat /tmp/matches.txt | rofi -dmenu -i -p "Select Match")
+echo $title
+[ ${#title} == 0 ] && exit 0
 
-matchTitles=$(echo "$raw" | pup "a attr{title}")
-
-title=$(echo "$matchTitles" | rofi -dmenu -i -p "Select Match")
-
+[[ $title == "STOP WATCHING" ]] && clear && exit 0
+#Getting Index of title selected 
 index=$(echo "$matchTitles" | grep -n "$title" | awk -F ":" '{print $1}')
+#Getting matchId from Index
+matchId=$(echo "${matchIds[$index - 1]}")
 
-matchId=$(echo "${matchIds[$index]}")
+iplscore.sh $matchId
 
-
-# echo "STOP WATCHING" >> /tmp/livematches.txt
-
-
-# match=$(cat /tmp/livematches.txt | rofi -dmenu -i -p "Select Match")
-
-# #$(rm /tmp/livematches.txt)
-# echo $match
-# if [[ $match == "STOP WATCHING" ]]
-# then
-# clear
-# exit 0
-# else
-# matchIds=$(echo $match | awk '{print $NF}')
-# echo $matchIds
-# clear
-# $(iplscore.sh $matchIds)
-
-# fi
-$(iplscore.sh $matchId)
