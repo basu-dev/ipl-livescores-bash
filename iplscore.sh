@@ -36,14 +36,14 @@ displaytype=0
 
 function fetch(){
 	response=$(curl -4 -s 'https://www.cricbuzz.com/api/cricket-match/commentary/'$matchId'' --compressed)
-	echo "fetched"
 	[ "${#response}" == 0 ] && exit 1
-	raw=$(echo $response | jq .miniscore)
-	[ "${#raw}" == 0 ] && matchNotStarted
+	rawScore=$(echo $response | jq .miniscore)
+	[ "${#rawScore}" == 0 ] && matchNotStarted || echo $rawScore > /tmp/iplscore.json
 }
 
 function construct(){
 	#rawScore for showing Score Wickets and Overs only
+	raw=$(cat /tmp/iplscore.json | jq)
 	rawScore=$(echo $raw | jq .matchScoreDetails)
 	inning=$(echo $raw | jq .inningsId)
 
@@ -86,16 +86,18 @@ function construct(){
 	#Sate shows whether match is complete or ongoing
 	state=$(echo $raw | jq -r .matchScoreDetails.state)
 	crr=$(echo $raw | jq -r .currentRunRate)
+	[ $inning == 2 ] && reqRunRate=$(echo $raw | jq -r '".. RRR \(.requiredRunRate)"') || ""
+	matchStatus=$(echo $raw | jq -r .status)
 
 }
 
 function display(){
-	echo "Displaying $displaytype"
+	
 	#Scoreboard has 3 sections 
 	#First with batting team and score i.e Scorecard
 	#Third With Bowling Team and Target
 	#Middle with Some additional Info
-
+	displaytype=$(tail -n 1 /tmp/displaytype.txt)
 	if [ $displaytype -eq 0 ]
 	then
 		middleSection=$(echo "$batsManScores .. $bowlerScore")
@@ -103,39 +105,48 @@ function display(){
 	then
 		middleSection=$(echo "$recentScores ... CRR $crr ")
 	else
-		[ $inning == 2 ] && reqRunRate=$(echo $raw | jq -r '".. RRR \(.requiredRunRate)"') || ""
-		echo $inning
-		matchStatus=$(echo $raw | jq -r .status)
 		middleSection=$(echo "$matchStatus $reqRunRate") 
 	fi
 
 	scoreBoard=$(echo "$scoreCard .. $middleSection .. $target $bowlTeam")
 
-	#echo -e "\033[36m $scoreBoard \033[0m"
+	echo -e "\033[36m $scoreBoard \033[0m"
 	echo -e "\033[0m "
 	writeBlock "${scoreBoard}"
 }
 function notInProgressMatch(){
-	displaytype=2 && display
+	setdisplaytype 2 && display
 	/bin/sleep 4
-	displaytype=0 && display
+	setdisplaytype 0 && display
 	/bin/sleep 4
 	clearBlock
 	exit 1
 }
- while true
-do
+function setdisplaytype(){
+	echo $1 > /tmp/displaytype.txt
+}
+fetch
+construct
+while true
+do 
+	/bin/sleep 7
 	fetch
 	construct
 	[[ $state !=  "In Progress" ]] && notInProgressMatch
 	display 
- 	/bin/sleep 5
-	displaytype=1
+done &
+ while true
+do
+	[[ $state !=  "In Progress" ]] && notInProgressMatch
+	construct
+	display 
+ 	/bin/sleep 7 && construct
+	setdisplaytype 1
        	display
- 	/bin/sleep 4
-	[[ $inning -gt 1 ]] && displaytype=2 || displaytype=0
+ 	/bin/sleep 7 && construct
+	[[ $inning -gt 1 ]] && setdisplaytype 2 || setdisplaytype 0
  	display
- 	/bin/sleep 4  && displaytype=0
+ 	/bin/sleep 7  && setdisplaytype 0
 done
 
 
