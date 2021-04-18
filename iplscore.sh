@@ -102,9 +102,11 @@ function display(){
 	elif [ $displaytype -eq 1 ]
 	then
 		middleSection=$(echo "$recentScores ... CRR $crr ")
-	else 
-
-		middleSection=$(echo $raw | jq -r .status)
+	else
+		[ $inning == 2 ] && reqRunRate=$(echo $raw | jq -r '".. RRR \(.requiredRunRate)"') || ""
+		echo $inning
+		matchStatus=$(echo $raw | jq -r .status)
+		middleSection=$(echo "$matchStatus $reqRunRate") 
 	fi
 
 	scoreBoard=$(echo "$scoreCard .. $middleSection .. $target $bowlTeam")

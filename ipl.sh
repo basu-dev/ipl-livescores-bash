@@ -26,5 +26,7 @@ index=$(echo "$matchTitles" | grep -n "$title" | awk -F ":" '{print $1}')
 #Getting matchId from Index
 matchId=$(echo "${matchIds[$index - 1]}")
 
+pkill iplscore.sh
+	
 iplscore.sh $matchId
 
