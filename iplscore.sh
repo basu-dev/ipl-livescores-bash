@@ -4,22 +4,22 @@
 # github https://github.com/basu-dev
 
 matchId=$1
-function writeBlock(){
+writeBlock(){
 	echo $1 > /tmp/display.txt
 	pkill -RTMIN+10 i3blocks
 }
-function clearBlock(){
+clearBlock(){
 	echo "" > /tmp/display.txt
 	pkill -RTMIN+10 i3blocks
 }
-function matchNotStarted(){
+matchNotStarted(){
 	writeBlock "Match Not Started Yet"
 	/bin/sleep 3
 	clearBlock
 	exit 1
 
 }
-function validateMatchId(){
+validateMatchId(){
 	status=$(curl -4 -I -s 'https://www.cricbuzz.com/api/cricket-match/commentary/'$matchId''\
 	       	| awk '/HTTP/ {print $2}')
 	if [ $status != 200 ]
@@ -34,14 +34,14 @@ function validateMatchId(){
 validateMatchId
 displaytype=0
 
-function fetch(){
+fetch(){
 	response=$(curl -4 -s 'https://www.cricbuzz.com/api/cricket-match/commentary/'$matchId'' --compressed)
 	[ "${#response}" == 0 ] && exit 1
 	rawScore=$(echo $response | jq .miniscore)
 	[ "${#rawScore}" == 0 ] && matchNotStarted || echo $rawScore > /tmp/iplscore.json
 }
 
-function construct(){
+construct(){
 	#rawScore for showing Score Wickets and Overs only
 	raw=$(cat /tmp/iplscore.json | jq)
 	rawScore=$(echo $raw | jq .matchScoreDetails)
@@ -60,10 +60,19 @@ function construct(){
 		#For inning 1 curreent batting and bowling teams were in position
 		# 0 of matchTeamInfo and on position 2 on second inning
 		matchTeams=$(echo $rawScore | jq .matchTeamInfo[0])
+	elif [ $inning == 2 ]
+	then
+		target=$(echo "")
+		matchTeams=$(echo $rawScore | jq .matchTeamInfo[1])
+	elif [ $inning == 3 ]
+	then
+		target=$(echo "")
+		matchTeams=$(echo $rawScore | jq .matchTeamInfo[2])
 	else
 		#target goes to third section of Scoreboard
-		target=$(echo $rawScore | jq -r '"Target \(.inningsScoreList[1].score+1)"')
-		matchTeams=$(echo $rawScore | jq .matchTeamInfo[1])
+		target=$(echo $rawScore | jq -r '"Target \(.inningsScoreList[4].score+1)"')
+		echo "$inning"
+		matchTeams=$(echo $rawScore | jq .matchTeamInfo["$inning"])
 	fi
 	batTeam=$(echo $matchTeams | jq -r .battingTeamShortName)
 	bowlTeam=$(echo $matchTeams | jq -r .bowlingTeamShortName)
@@ -86,12 +95,13 @@ function construct(){
 	#Sate shows whether match is complete or ongoing
 	state=$(echo $raw | jq -r .matchScoreDetails.state)
 	crr=$(echo $raw | jq -r .currentRunRate)
-	[ $inning == 2 ] && reqRunRate=$(echo $raw | jq -r '".. RRR \(.requiredRunRate)"') || ""
+	echo "$inning"
+	[ "$inning" == 2 ] && reqRunRate=$(echo $raw | jq -r '".. RRR \(.requiredRunRate)"') || requiredRunRate=""
 	matchStatus=$(echo $raw | jq -r .status)
 
 }
 
-function display(){
+display(){
 	
 	#Scoreboard has 3 sections 
 	#First with batting team and score i.e Scorecard
@@ -114,7 +124,7 @@ function display(){
 	echo -e "\033[0m "
 	writeBlock "${scoreBoard}"
 }
-function notInProgressMatch(){
+notInProgressMatch(){
 	setdisplaytype 2 && display
 	/bin/sleep 4
 	setdisplaytype 0 && display
@@ -122,7 +132,7 @@ function notInProgressMatch(){
 	clearBlock
 	exit 1
 }
-function setdisplaytype(){
+setdisplaytype(){
 	echo $1 > /tmp/displaytype.txt
 }
 fetch
